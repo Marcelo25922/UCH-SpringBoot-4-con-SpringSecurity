@@ -1,8 +1,7 @@
 [build]
-builder = "NIXPACKS"
-
-[phases.build]
-cmds = ["./mvnw -B -DskipTests clean package"]
+builder = "pack"
+buildCommand = "./mvnw clean package -DskipTests"
+projectPath = "pu4s16"
 
 [start]
-cmd = "java -jar target/*.jar"
+command = "java -jar target/*.jar"
