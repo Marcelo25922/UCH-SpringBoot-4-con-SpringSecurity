@@ -1,7 +1,8 @@
 [build]
 builder = "pack"
-projectPath = "app_java"
-buildCommand = "./mvnw clean package -DskipTests"
 
-[start]
-command = "java -jar target/*.jar"
+[build.args]
+BP_JVM_VERSION = "17"
+
+[deploy]
+start = "java -jar target/*.jar"
