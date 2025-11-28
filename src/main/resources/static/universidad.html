@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Postulantes - Universidad</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Instagram color palette */
+        :root {
+            --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --instagram-purple: #833ab4;
+            --instagram-pink: #fd1d1d;
+            --instagram-orange: #fcb045;
+            --bg-dark: #000000;
+            --bg-card: #1a1a1a;
+            --border-color: #262626;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8a8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* Page visibility control */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Sidebar with proper flexbox */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 80px;
+            background: var(--instagram-gradient);
+            transition: width 0.3s ease;
+            z-index: 1000;
+            overflow: hidden;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar:hover {
+            width: 250px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-logo {
+            font-size: 28px;
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .sidebar:hover .sidebar-title {
+            opacity: 1;
+        }
+        
+        .sidebar-spacer {
+            flex-grow: 1;
+        }
+        
+        .sidebar-user {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #e6683c;
+            flex-shrink: 0;
+        }
+        
+        .user-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .sidebar:hover .user-info {
+            opacity: 1;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        
+        .btn-logout {
+            background-color: #ff3040;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            padding: 0 15px;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .btn-logout:hover {
+            background-color: #e02030;
+            transform: scale(1.05);
+        }
+        
+        .btn-logout i {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .btn-logout-text {
+            opacity: 0;
+            margin-left: 10px;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .sidebar:hover .btn-logout-text {
+            opacity: 1;
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 80px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        /* Login page */
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .login-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: var(--instagram-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        .login-header h2 {
+            color: var(--text-primary);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Error 403 page */
+        .error-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+        }
+        
+        .error-icon {
+            font-size: 120px;
+            background: var(--instagram-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .error-container h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: var(--instagram-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Form page */
+        .form-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            background: var(--instagram-gradient);
+            border-bottom: none;
+            border-radius: 16px 16px 0 0 !important;
+            padding: 20px;
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-weight: bold;
+            color: white;
+        }
+        
+        /* Form controls */
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-control, .form-select {
+            background-color: #262626;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #262626;
+            border-color: #e6683c;
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(230, 104, 60, 0.25);
+        }
+        
+        .form-select option {
+            background-color: #262626;
+        }
+        
+        /* Table */
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            padding: 15px;
+        }
+        
+        .table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #262626;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        .user-table-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--instagram-gradient);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: var(--instagram-gradient);
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 10px 25px;
+            transition: transform 0.2s ease;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        
+        .btn-success {
+            background-color: #17bf63;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #14a554;
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background-color: #ff3040;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e02030;
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background-color: #536471;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 25px;
+            color: white;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3d4f5c;
+            transform: scale(1.05);
+        }
+        
+        .alert {
+            border-radius: 8px;
+        }
+        
+        .alert-danger {
+            background-color: #ff3040;
+            border: none;
+            color: white;
+        }
+        
+        .alert-success {
+            background-color: #17bf63;
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Login Page -->
+    <div id="loginPage" class="page active login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Iniciar Sesión</h2>
+                <p>Sistema de Gestión de Postulantes</p>
+            </div>
+            
+            <div id="loginError" class="alert alert-danger" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos
+            </div>
+            
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Usuario:</label>
+                    <input type="text" class="form-control" id="username" required autofocus>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">Contraseña:</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- List Page -->
+    <div id="listPage" class="page">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span class="sidebar-title">Postulantes</span>
+            </div>
+            
+            <div class="sidebar-spacer"></div>
+            
+            <div class="sidebar-user">
+                <div class="user-container">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <span id="currentUser"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="btn-logout-text">Cerrar Sesión</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3><i class="fas fa-list"></i> Lista de Postulantes</h3>
+                        <button onclick="showFormPage()" class="btn btn-primary" id="btnNuevo">
+                            <i class="fas fa-plus"></i> Nuevo Postulante
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombres</th>
+                                    <th>Apellidos</th>
+                                    <th>Dirección</th>
+                                    <th>Correo</th>
+                                    <th>Puesto</th>
+                                    <th id="accionesHeader">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postulantesList">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Page -->
+    <div id="formPage" class="page form-page">
+        <div class="card" style="max-width: 600px; width: 100%;">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-user-plus"></i> 
+                    <span id="formTitle">Nuevo Postulante</span>
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <form id="postulanteForm">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="mb-3">
+                        <label for="nombres" class="form-label">Nombres:</label>
+                        <input type="text" class="form-control" id="nombres" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="apellidos" class="form-label">Apellidos:</label>
+                        <input type="text" class="form-control" id="apellidos" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección:</label>
+                        <input type="text" class="form-control" id="direccion" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo:</label>
+                        <input type="email" class="form-control" id="correo" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="puesto" class="form-label">Puesto:</label>
+                        <select class="form-select" id="puesto" required>
+                            <option value="">Seleccione un puesto</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar
+                        </button>
+                        <button type="button" onclick="showListPage()" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error 403 Page -->
+    <div id="error403Page" class="page error-page">
+        <div class="error-container">
+            <i class="fas fa-ban error-icon"></i>
+            <h1>Acceso Denegado</h1>
+            <p class="lead">No tienes permisos para acceder a esta función.</p>
+            <button onclick="showListPage()" class="btn btn-primary mt-4">
+                <i class="fas fa-home"></i> Volver al Inicio
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Data storage
+        let currentUser = null;
+        let postulantes = [];
+        let puestos = [
+            { id: 1, nombre: 'Desarrollador' },
+            { id: 2, nombre: 'Diseñador' },
+            { id: 3, nombre: 'Gerente' },
+            { id: 4, nombre: 'Analista' },
+            { id: 5, nombre: 'Asistente' }
+        ];
+        let users = [
+            { username: 'estudiante', password: 'estudiante2025', role: 'USER' },
+            { username: 'manager', password: 'manager2025', role: 'MANAGER' },
+            { username: 'admin', password: 'admin2025', role: 'ADMIN' }
+        ];
+        
+        // Initialize with sample data
+        postulantes = [
+            { id: 1, nombres: 'Juan', apellidos: 'Pérez', direccion: 'Av. Principal 123', correo: 'juan@email.com', puestoId: 1 },
+            { id: 2, nombres: 'María', apellidos: 'García', direccion: 'Calle Secundaria 456', correo: 'maria@email.com', puestoId: 2 },
+            { id: 3, nombres: 'Carlos', apellidos: 'López', direccion: 'Jr. Los Olivos 789', correo: 'carlos@email.com', puestoId: 3 }
+        ];
+        
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        function showLoginPage() {
+            showPage('loginPage');
+        }
+        
+        function showListPage() {
+            if (!currentUser) {
+                showLoginPage();
+                return;
+            }
+            renderPostulantes();
+            updateUIForRole();
+            showPage('listPage');
+        }
+        
+        function showFormPage(id = null) {
+            if (!currentUser) {
+                showLoginPage();
+                return;
+            }
+            
+            if (currentUser.role === 'USER') {
+                showPage('error403Page');
+                return;
+            }
+            
+            // Load puestos in select
+            const puestoSelect = document.getElementById('puesto');
+            puestoSelect.innerHTML = '<option value="">Seleccione un puesto</option>';
+            puestos.forEach(p => {
+                puestoSelect.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
+            });
+            
+            if (id) {
+                const postulante = postulantes.find(p => p.id === id);
+                if (postulante) {
+                    document.getElementById('formTitle').textContent = 'Editar Postulante';
+                    document.getElementById('editId').value = postulante.id;
+                    document.getElementById('nombres').value = postulante.nombres;
+                    document.getElementById('apellidos').value = postulante.apellidos;
+                    document.getElementById('direccion').value = postulante.direccion;
+                    document.getElementById('correo').value = postulante.correo;
+                    document.getElementById('puesto').value = postulante.puestoId;
+                }
+            } else {
+                document.getElementById('formTitle').textContent = 'Nuevo Postulante';
+                document.getElementById('postulanteForm').reset();
+                document.getElementById('editId').value = '';
+            }
+            
+            showPage('formPage');
+        }
+        
+        // Login handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('currentUser').textContent = username;
+                document.getElementById('loginError').style.display = 'none';
+                showListPage();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+        
+        // Logout
+        function logout() {
+            if (confirm('¿Está seguro de cerrar sesión?')) {
+                currentUser = null;
+                document.getElementById('loginForm').reset();
+                showLoginPage();
+            }
+        }
+        
+        // Render postulantes list
+        function renderPostulantes() {
+            const tbody = document.getElementById('postulantesList');
+            tbody.innerHTML = '';
+            
+            postulantes.forEach(p => {
+                const puesto = puestos.find(pu => pu.id === p.puestoId);
+                const canEdit = currentUser.role === 'MANAGER' || currentUser.role === 'ADMIN';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div class="user-table-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        </td>
+                        <td>${p.nombres}</td>
+                        <td>${p.apellidos}</td>
+                        <td>${p.direccion}</td>
+                        <td>${p.correo}</td>
+                        <td>${puesto ? puesto.nombre : 'N/A'}</td>
+                        <td>
+                            ${canEdit ? `
+                                <div class="action-buttons">
+                                    <button onclick="editPostulante(${p.id})" class="btn btn-success btn-sm">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button onclick="deletePostulante(${p.id})" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        // Update UI based on user role
+        function updateUIForRole() {
+            const canEdit = currentUser.role === 'MANAGER' || currentUser.role === 'ADMIN';
+            document.getElementById('btnNuevo').style.display = canEdit ? 'inline-block' : 'none';
+            document.getElementById('accionesHeader').style.display = canEdit ? 'table-cell' : 'none';
+        }
+        
+        // Form submission
+        document.getElementById('postulanteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editId').value;
+            const isEditing = editId !== '';
+            
+            const message = isEditing 
+                ? '¿Está seguro de guardar los cambios en este postulante?' 
+                : '¿Está seguro de crear este nuevo postulante?';
+            
+            if (!confirm(message)) {
+                return;
+            }
+            
+            const postulante = {
+                id: isEditing ? parseInt(editId) : Date.now(),
+                nombres: document.getElementById('nombres').value,
+                apellidos: document.getElementById('apellidos').value,
+                direccion: document.getElementById('direccion').value,
+                correo: document.getElementById('correo').value,
+                puestoId: parseInt(document.getElementById('puesto').value)
+            };
+            
+            if (isEditing) {
+                const index = postulantes.findIndex(p => p.id === postulante.id);
+                if (index !== -1) {
+                    postulantes[index] = postulante;
+                }
+            } else {
+                postulantes.push(postulante);
+            }
+            
+            showListPage();
+        });
+        
+        // Edit postulante
+        function editPostulante(id) {
+            if (confirm('¿Está seguro de editar este postulante?')) {
+                showFormPage(id);
+            }
+        }
+        
+        // Delete postulante
+        function deletePostulante(id) {
+            if (confirm('¿Está seguro de eliminar este postulante? Esta acción no se puede deshacer.')) {
+                postulantes = postulantes.filter(p => p.id !== id);
+                renderPostulantes();
+            }
+        }
+        
+        // Initialize
+        showLoginPage();
+    </script>
+</body>
+</html>

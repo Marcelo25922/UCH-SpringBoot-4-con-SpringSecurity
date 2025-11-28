@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Postulantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Instagram color palette */
+        :root {
+            --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --bg-dark: #000000;
+            --bg-card: #1a1a1a;
+            --border-color: #262626;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8a8;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-header .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: var(--instagram-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+        }
+        
+        .login-header h2 {
+            color: var(--text-primary);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        
+        .form-control {
+            background-color: #262626;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .form-control:focus {
+            background-color: #262626;
+            border-color: #e6683c;
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(230, 104, 60, 0.25);
+        }
+        
+        .btn-login {
+            background: var(--instagram-gradient);
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 12px;
+            width: 100%;
+            color: white;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn-login:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+        
+        .alert {
+            background-color: #ff3040;
+            border: none;
+            border-radius: 8px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h2>Iniciar Sesión</h2>
+            <p>Sistema de Gestión de Postulantes</p>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos
+        </div>
+        
+        <form th:action="@{/login}" method="post">
+            <div class="mb-3">
+                <label for="username" class="form-label">Usuario:</label>
+                <input type="text" class="form-control" id="username" name="username" required autofocus>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-login">
+                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

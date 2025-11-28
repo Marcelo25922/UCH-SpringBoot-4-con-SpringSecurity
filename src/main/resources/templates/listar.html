@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Postulantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Instagram color palette applied throughout */
+        :root {
+            --instagram-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --instagram-purple: #833ab4;
+            --instagram-pink: #fd1d1d;
+            --instagram-orange: #fcb045;
+            --bg-dark: #000000;
+            --bg-card: #1a1a1a;
+            --border-color: #262626;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8a8;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Fixed sidebar with proper flexbox layout to prevent icon deformation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 80px;
+            background: var(--instagram-gradient);
+            transition: width 0.3s ease;
+            z-index: 1000;
+            overflow: hidden;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar:hover {
+            width: 250px;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-logo {
+            font-size: 28px;
+            color: white;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-title {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .sidebar:hover .sidebar-title {
+            opacity: 1;
+        }
+        
+        /* Added flex-grow to push user section to bottom */
+        .sidebar-spacer {
+            flex-grow: 1;
+        }
+        
+        .sidebar-user {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #e6683c;
+            flex-shrink: 0;
+        }
+        
+        .user-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .user-info {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: white;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .sidebar:hover .user-info {
+            opacity: 1;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        
+        /* Fixed logout button to prevent stretching */
+        .btn-logout {
+            background-color: #ff3040;
+            border: none;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            padding: 0 15px;
+            width: 100%;
+        }
+        
+        .btn-logout:hover {
+            background-color: #e02030;
+            transform: scale(1.05);
+        }
+        
+        .btn-logout i {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .btn-logout-text {
+            opacity: 0;
+            margin-left: 10px;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .sidebar:hover .btn-logout-text {
+            opacity: 1;
+        }
+        
+        /* Main content with responsive animation */
+        .main-content {
+            margin-left: 80px;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            background: var(--instagram-gradient);
+            border-bottom: none;
+            border-radius: 16px 16px 0 0 !important;
+            padding: 20px;
+        }
+        
+        .card-header h3 {
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        /* Enhanced table with better styling */
+        .table {
+            color: var(--text-primary);
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            padding: 15px;
+        }
+        
+        .table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #262626;
+        }
+        
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        
+        /* User avatar icon in table */
+        .user-table-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--instagram-gradient);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        /* Separated action buttons with better spacing */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--instagram-gradient);
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 10px 25px;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+        
+        .btn-success {
+            background-color: #17bf63;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-success:hover {
+            background-color: #14a554;
+            transform: scale(1.05);
+        }
+        
+        .btn-danger {
+            background-color: #ff3040;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            padding: 8px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e02030;
+            transform: scale(1.05);
+        }
+        
+        .btn-secondary {
+            background-color: #536471;
+            border: none;
+            border-radius: 20px;
+        }
+        
+        /* Custom confirmation modal styling */
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            background: var(--instagram-gradient);
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Restructured sidebar with proper flexbox to prevent icon deformation -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="fas fa-users"></i>
+            </div>
+            <span class="sidebar-title">Postulantes</span>
+        </div>
+        
+        <div class="sidebar-spacer"></div>
+        
+        <div class="sidebar-user">
+            <div class="user-container">
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="user-info">
+                    <span sec:authentication="name"></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sidebar-footer">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="btn-logout-text">Cerrar Sesión</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3><i class="fas fa-list"></i> Lista de Postulantes</h3>
+                    <a th:href="@{/nuevo}" class="btn btn-primary" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                        <i class="fas fa-plus"></i> Nuevo Postulante
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombres</th>
+                                <th>Apellidos</th>
+                                <th>Dirección</th>
+                                <th>Correo</th>
+                                <th>Puesto</th>
+                                <th sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="postulante : ${postulantes}">
+                                <td>
+                                    <!-- User avatar icon with user icon -->
+                                    <div class="user-table-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                </td>
+                                <td th:text="${postulante.nombres}"></td>
+                                <td th:text="${postulante.apellidos}"></td>
+                                <td th:text="${postulante.direccion}"></td>
+                                <td th:text="${postulante.correo}"></td>
+                                <td th:text="${postulante.puesto.nombrePuesto}"></td>
+                                <td sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                                    <!-- Vertically separated buttons -->
+                                    <div class="action-buttons">
+                                        <a th:href="@{/editar/{id}(id=${postulante.idPostulante})}" 
+                                           class="btn btn-success btn-sm"
+                                           onclick="return confirm('¿Está seguro de editar este postulante?')">
+                                            <i class="fas fa-edit"></i> Editar
+                                        </a>
+                                        <a th:href="@{/borrar/{id}(id=${postulante.idPostulante})}" 
+                                           class="btn btn-danger btn-sm"
+                                           onclick="return confirm('¿Está seguro de eliminar este postulante? Esta acción no se puede deshacer.')">
+                                            <i class="fas fa-trash"></i> Eliminar
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
