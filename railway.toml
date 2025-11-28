@@ -1,7 +1,0 @@
-[build]
-builder = "pack"
-projectPath = "app_java"
-buildCommand = "./mvnw clean package -DskipTests"
-
-[start]
-command = "java -jar target/*.jar"
