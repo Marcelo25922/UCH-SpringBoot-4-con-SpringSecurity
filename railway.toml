@@ -1,7 +1,7 @@
 [build]
 builder = "pack"
+projectPath = "app_java"
 buildCommand = "./mvnw clean package -DskipTests"
-projectPath = "pu4s16"
 
 [start]
 command = "java -jar target/*.jar"
